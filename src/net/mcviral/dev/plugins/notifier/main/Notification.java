@@ -16,4 +16,20 @@ public class Notification {
 		offline = canbeoffline;
 	}
 	
+	public UUID getPlayerUUID(){
+		return uuid;
+	}
+	
+	public String getName(){
+		return name;
+	}
+	
+	public String[] getDescription(){
+		return description;
+	}
+	
+	public boolean getOffline(){
+		return offline;
+	}
+	
 }
