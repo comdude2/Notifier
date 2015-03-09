@@ -10,19 +10,19 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Notifier extends JavaPlugin{
 	
 	public Log log = new Log(this.getName());
-	private NotificationManager notman = null;
+	//private NotificationManager notman = null;
 	
 	public void onEnable(){
-		notman = new NotificationManager(this);
+		//notman = new NotificationManager(this);
 	}
 	
 	public void onDisable(){
 		
 	}
 	
-	public NotificationManager getNotificationManager(){
-		return notman;
-	}
+	//public NotificationManager getNotificationManager(){
+		//return notman;
+	//}
 	
 	public void createYaml(String name){
 		try{ 
