@@ -104,10 +104,12 @@ public class Notifier extends JavaPlugin{
 							String name = args[2];
 							String mat = args[3];
 							boolean offline;
-							try{
-								offline = Boolean.getBoolean(args[4]);
-							}catch(Exception e){
+							if (args[4].equalsIgnoreCase("true")){
+								offline = true;
+							}else if (args[4].equalsIgnoreCase("false")){
 								offline = false;
+							}else{
+								offline = true;
 							}
 							LinkedList <String> descv = new LinkedList <String> ();
 							String[] desc = null;

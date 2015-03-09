@@ -11,6 +11,7 @@ import net.mcviral.dev.plugins.notifier.menu.IconMenu;
 import net.mcviral.dev.plugins.notifier.util.FileManager;
 import net.md_5.bungee.api.ChatColor;
 
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -134,6 +135,7 @@ public class NotificationManager {
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void displayNotifications(Player p){
 		notifier.log.info("Starting display of notifications for " + p.getName());
 		LinkedList <Notification> notifications = getNotificationsForPlayer(p.getUniqueId());
@@ -174,7 +176,16 @@ public class NotificationManager {
 				}
 				IconMenu menu = new IconMenu("Notifications - " + p.getName(), size, new IconMenu.OptionClickEventHandler() {
 			    @Override
-			    public void onOptionClick(IconMenu.OptionClickEvent event) {}
+			    public void onOptionClick(IconMenu.OptionClickEvent event) {
+			    	if (event.getName().equals(ChatColor.GOLD + "Clear Notifications")){
+			    		notifier.getNotificationManager().wipeNotificationsForPlayer(event.getPlayer());
+			    		event.setWillClose(true);
+			    		event.setWillDestroy(true);
+			    	}else{
+			    		event.setWillClose(false);
+			    		event.setWillDestroy(false);
+			    	}
+			    }
 			    }, notifier);
 				int i = 0;
 				//Add support for coloured notifications
@@ -182,6 +193,9 @@ public class NotificationManager {
 			    	menu.setOption(i, new ItemStack(Material.getMaterial(n.getMaterial()), 1), ChatColor.GREEN + n.getName(), n.getDescription());
 			    	i++;
 			    }
+			    
+			    String[] desc = {"Clears all notifications", ChatColor.DARK_RED + "Cannot be undone"};
+			    menu.setOption((size - 1), new ItemStack(Material.WOOL, 1, DyeColor.YELLOW.getData()), ChatColor.GOLD + "Clear Notifications", desc);
 			    loadNotificationsForPlayer(p, menu);
 				menu.open(p);
 			}else{
