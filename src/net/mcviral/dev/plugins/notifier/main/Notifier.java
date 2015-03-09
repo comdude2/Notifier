@@ -14,6 +14,7 @@ public class Notifier extends JavaPlugin{
 	
 	public void onEnable(){
 		//notman = new NotificationManager(this);
+		this.saveDefaultConfig();
 	}
 	
 	public void onDisable(){
