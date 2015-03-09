@@ -2,7 +2,9 @@ package net.mcviral.dev.plugins.notifier.main;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 import net.mcviral.dev.plugins.notifier.menu.IconMenu;
@@ -25,56 +27,115 @@ public class NotificationManager {
 		}
 	}
 	
-	public LinkedList <Notification> getNotificationsForPlayer(UUID uuid){
+	public void setNotificationsForPlayer(UUID uuid, LinkedList <Notification> notifications){
 		if (folderExists(notifier.getDataFolder() + "/Notifications/")){
+			notifier.log.info("Notifications folder found.");
 			FileManager fm = null;
-			fm = new FileManager(notifier, notifier.getDataFolder() + "/Notifications/", uuid.toString());
-			int count = fm.getYAML().getInt("count");
-			LinkedList <Notification> notifications = new LinkedList <Notification> ();
-			Notification temp = null;
-			String name = null;
-			String[] desc = null;
-			String mat = null;
-			boolean offline = false;
-			for(int i=1; i<count; i++){
-				temp = null;
-				name = fm.getYAML().getString(i + ".notification.name");
-				desc = (String[]) fm.getYAML().getStringList(i + ".notification.desc").toArray();
-				if (fm.getYAML().getString(i + ".notification.material") != null){
-					mat = fm.getYAML().getString(i + ".notification.material");
-				}else{
-					mat = null;
+			File f = new File(notifier.getDataFolder() + "/Notifications/" + uuid.toString() + ".yml");
+			if (f.exists()){
+				f.delete();
+				notifier.createYaml(notifier.getDataFolder() + "/Notifications/" + uuid.toString());
+				fm = new FileManager(notifier, "/Notifications/", uuid.toString());
+				int count = notifications.size();
+				int i = 1;
+				fm.getYAML().set("count", count);
+				if (notifications.size() > 0){
+					List <String> desc = null;
+					for (Notification n : notifications){
+						try{
+							fm.getYAML().set(i + ".name", n.getName());
+							desc = Arrays.asList(n.getDescription());
+							fm.getYAML().set(i + ".description", desc);
+							fm.getYAML().set(i + ".material", n.getMaterial());
+							fm.getYAML().set(i + ".offline", n.getOffline());
+						}catch(Exception e){
+							e.printStackTrace();
+						}
+					}
 				}
-				offline = fm.getYAML().getBoolean(i + ".notification.offline");
-				temp = new Notification(uuid, name, desc, mat, offline);
-				notifications.add(temp);
-	        }
-			return notifications;
+				fm.saveYAML();
+				notifier.log.info("Notifications saved for " + uuid.toString());
+			}
+		}else{
+			notifier.log.info("No notifications file found.");
+			return;
+		}
+	}
+	
+	public LinkedList <Notification> getNotificationsForPlayer(UUID uuid){
+		notifier.log.info("Getting notifications for: " + uuid);
+		if (folderExists(notifier.getDataFolder() + "/Notifications/")){
+			notifier.log.info("Notifications folder found.");
+			FileManager fm = null;
+			File f = new File(notifier.getDataFolder() + "/Notifications/" + uuid.toString() + ".yml");
+			if (f.exists()){
+				fm = new FileManager(notifier, "/Notifications/", uuid.toString());
+				int count = fm.getYAML().getInt("count");
+				if (count > 0){
+					notifier.log.info("Notifications count is greater than 0.");
+					LinkedList <Notification> notifications = new LinkedList <Notification> ();
+					Notification temp = null;
+					String name = null;
+					String[] desc = null;
+					String mat = null;
+					boolean offline = false;
+					for(int i=1; i<(count + 1); i++){
+						notifier.log.info("Loading notification " + i + ".");
+						temp = null;
+						name = fm.getYAML().getString(i + ".name");
+						desc = fm.getYAML().getStringList(i + ".description").toArray(new String[0]);
+						if (fm.getYAML().getString(i + ".material") != null){
+							mat = fm.getYAML().getString(i + ".material");
+						}else{
+							mat = null;
+						}
+						offline = fm.getYAML().getBoolean(i + ".offline");
+						notifier.log.info("Notification " + i);
+						notifier.log.info("Name: " + name);
+						notifier.log.info("Description: " + desc.toString());
+						notifier.log.info("Material: " + mat);
+						notifier.log.info("Offline: " + offline);
+						temp = new Notification(uuid, name, desc, mat, offline);
+						notifications.add(temp);
+	        		}
+					return notifications;
+				}else{
+					notifier.log.info("Count field not found in file.");
+				}
+			}else{
+				notifier.log.info("No notifications file found.");
+				return null;
+			}
 		}
 		return null;
 	}
 	
 	public void loadNotificationsForPlayer(Player p, IconMenu m){
+		notifier.log.info("Loading notifications for player: " + p.getName() + " into memory...");
 		for (NotificationStore store : stores){
 			if (store.getPlayerUUID().equals(p.getUniqueId())){
+				notifier.log.info("Notifications for " + p.getName() + " alread stored.");
 				return;
 			}
 		}
 		LinkedList <Notification> notifications = null;
 		notifications = getNotificationsForPlayer(p.getUniqueId());
 		stores.add(new NotificationStore(p.getUniqueId(), notifications, m));
+		notifier.log.info("Notifications stored.");
 	}
 	
 	public void unloadNotificationsForPlayer(Player p){
 		for (NotificationStore store : stores){
 			if (store.getPlayerUUID().equals(p.getUniqueId())){
 				stores.remove(store);
+				notifier.log.info("Store for " + p.getName() + " unloaded.");
 				return;
 			}
 		}
 	}
 	
 	public void displayNotifications(Player p){
+		notifier.log.info("Starting display of notifications for " + p.getName());
 		LinkedList <Notification> notifications = getNotificationsForPlayer(p.getUniqueId());
 		int size = -1;
 		if (notifications != null){
@@ -124,6 +185,7 @@ public class NotificationManager {
 			    loadNotificationsForPlayer(p, menu);
 				menu.open(p);
 			}else{
+				notifier.log.info("Too many notifications to load into menu.");
 				//Notifications are above maximum inventory size, this needs to be handled ASAP
 			}
 		}
@@ -186,8 +248,10 @@ public class NotificationManager {
 	public int getNotificationCountForPlayer(Player p){
 		if (folderExists(notifier.getDataFolder() + "/Notifications/")){
 			FileManager fm = null;
-			fm = new FileManager(notifier, notifier.getDataFolder() + "/Notifications/", p.getUniqueId().toString());
-			return fm.getYAML().getInt("count");
+			fm = new FileManager(notifier, "/Notifications/", p.getUniqueId().toString());
+			int count =  fm.getYAML().getInt("count");
+			notifier.log.info("Count: " + count);
+			return count;
 		}
 		return -1;
 	}

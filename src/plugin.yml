@@ -2,3 +2,9 @@ name: Notifier
 main: net.mcviral.dev.plugins.notifier.main.Notifier
 version: 1.0
 author: comdude2
+commands:
+   notifications:
+      description: This is this plugin's main command.
+      usage: /<command> help
+      permission: notifier.main
+      permission-message: You don't have the required permission to perform this command.
