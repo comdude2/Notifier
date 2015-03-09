@@ -10,20 +10,27 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Notifier extends JavaPlugin{
 	
 	public Log log = new Log(this.getName());
-	//private NotificationManager notman = null;
+	private NotificationManager notman = null;
+	private Listeners listeners = null;
+	private boolean loadedbefore = false;
 	
 	public void onEnable(){
-		//notman = new NotificationManager(this);
+		notman = new NotificationManager(this);
 		this.saveDefaultConfig();
+		if (loadedbefore == false){
+			listeners = new Listeners(this, notman);
+			this.getServer().getPluginManager().registerEvents(listeners, this);
+		}
+		this.getLogger().info(this.getDescription().getName() + " Enabled!");
 	}
 	
 	public void onDisable(){
-		
+		this.getLogger().info(this.getDescription().getName() + " Disabled!");
 	}
 	
-	//public NotificationManager getNotificationManager(){
-		//return notman;
-	//}
+	public NotificationManager getNotificationManager(){
+		return notman;
+	}
 	
 	public void createYaml(String name){
 		try{ 

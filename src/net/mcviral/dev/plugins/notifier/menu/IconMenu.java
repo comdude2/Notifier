@@ -31,6 +31,7 @@ public class IconMenu implements Listener{
     //public void onOptionClick(IconMenu.OptionClickEvent event) {
         //event.getPlayer().sendMessage("You have chosen " + event.getName());
         //event.setWillClose(true);
+        //event.setWillDestroy(true);
     //}
     //}, plugin)
     //.setOption(3, new ItemStack(Material.APPLE, 1), "Food", "The food is delicious")
@@ -52,6 +53,23 @@ public class IconMenu implements Listener{
         optionNames[position] = name;
         optionIcons[position] = setItemNameAndLore(icon, name, info);
         return this;
+    }
+    
+    public void clear(){
+    	this.optionNames = new String[size];
+        this.optionIcons = new ItemStack[size];
+    }
+    
+    public String[] getOptionNames(){
+    	return optionNames;
+    }
+    
+    public ItemStack[] getOptionIcons(){
+    	return optionIcons;
+    }
+    
+    public int getMenuSize(){
+    	return size;
     }
    
     public void open(Player player) {
