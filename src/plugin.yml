@@ -1,0 +1,4 @@
+name: Notifier
+main: net.mcviral.dev.plugins.notifier.main.Notifier
+version: 1.0
+author: comdude2
